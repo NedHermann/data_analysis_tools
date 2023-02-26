@@ -1,0 +1,55 @@
+---
+title: "Web Scraping - Static Websites Tables"
+author: Ned Hermann
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+```
+
+```{r}
+url <- "https://www.nyse.com/markets/hours-calendars"
+```
+
+```{r}
+raw_tbl <- read_html(url) %>%
+  html_table() %>%
+  pluck(1)
+
+## pick specific table if page has multiple table elements
+# read_html("https://www.nyse.com/markets/hours-calendars") %>%
+#   html_nodes("table.table-data") %>%
+#   html_table() %>%
+#   pluck(1)
+
+raw_tbl
+# write_csv(head(raw_tbl, 5), "data/raw_tbl_sample.csv")
+```
+
+```{r}
+month_str <- paste(month.name[1:12], collapse = "|")
+
+date_tbl <- raw_tbl %>%
+  select(2:4) %>%
+  mutate(across(everything(), function(x) paste(str_extract(x, month_str), parse_number(x), sep = ", "))) %>%
+  pivot_longer(everything(), names_to = "year", values_to = "month_day") %>%
+  mutate(date = paste(month_day, year),
+         date = as.Date(date, format = "%B, %d %Y")) %>%
+  arrange(date)
+
+date_tbl
+# write_csv(head(date_tbl, 5), "data/date_tbl_sample.csv")
+```
+
+```{r}
+holiday_tbl <- raw_tbl %>%
+  mutate(across(2:4, function(x) paste(str_extract(x, month_str), parse_number(x), sep = ", "))) %>%
+  pivot_longer(2:4, names_to = "year", values_to = "month_day") %>%
+  left_join(date_tbl, by = c("year", "month_day")) %>%
+  select("holiday" = Holiday, date) %>%
+  arrange(date)
+
+holiday_tbl
+# write_csv(head(holiday_tbl, 5), "data/holiday_tbl_sample.csv")
+```

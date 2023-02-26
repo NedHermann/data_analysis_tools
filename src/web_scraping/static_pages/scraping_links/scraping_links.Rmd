@@ -1,0 +1,67 @@
+---
+title: "Web Scraping - Static Websites Links"
+author: Ned Hermann
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+```
+
+```{r}
+url <- "https://www.microsoft.com/en-us/investor/events/events-recent.aspx"
+```
+
+```{r}
+div_tags <- read_html(url) %>%
+  html_nodes("div.PastEvents div.m-content-placement-item.f-size-small") 
+
+head(div_tags, 5)
+```
+
+```{r}
+msft_tbl <- lapply(1:length(div_tags), function(x){
+  el <- div_tags[[x]] 
+  
+  title <- el %>%
+    html_nodes("ul li:nth-child(3) h3") %>%
+    html_text()
+  
+  date <- el %>%
+    html_nodes("ul li:nth-child(2)") %>%
+    html_text() %>%
+    as.Date(., format = "%B %d, %Y")
+  
+  if(length(html_nodes(el, "ul li:nth-child(1) a")) > 0){
+    link <- html_nodes(el, "ul li:nth-child(1) a") %>%
+      html_attr("href") 
+    
+  } else {
+    link <- NA
+  }
+  
+  tbl <- data.frame(
+    date = date,
+    title = title,
+    link = link)
+  
+  return(tbl)
+})
+
+head(msft_tbl, 5)
+# write_csv(msft_tbl[[1]], "data/scrape_tbl_sample.csv")
+```
+
+```{r}
+msft_tbl <- bind_rows(msft_tbl) %>%
+  mutate(link = ifelse(str_starts(link, "/"), paste("https://microsoft.com", link, sep = ""), link)) %>%
+  arrange(desc(date))
+
+head(msft_tbl, 5)
+# write_csv(head(msft_tbl, 5), "data/msft_tbl_sample.csv")
+```
+
+
+
+
+
