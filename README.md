@@ -9,7 +9,7 @@ This repository will cover all data analysis skills I found practically useful o
 
 ### TBD:
 - Volatility Models
-  - Close-to-close, yang-zhang, garman-klass, ewma, some alterations from euan books
+  - Close-to-close, yang-zhang, garman-klass, ewma, altered models from [Volatility Trading](https://www.amazon.com/Volatility-Trading-Website-Euan-Sinclair/dp/1118347137) by Euan Sinclair
 - Linear Regression
 - Logistic Regression
 - Random Forest
