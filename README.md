@@ -19,7 +19,7 @@ This repository will cover all data analysis skills I found practically useful o
 - Text Mining
   - Text analysis - quantifying qualitative variables. ie. news
 - Exporatory Data Analysis
-  - Cleaning data, transforming data, identify objectives, tell a story
+  - Cleaning data, transforming data, identify objectives, feature engineering, telling a story
 - Back Testing
   - Rolling window backtests, sharpe timeseries, performance analysis, a lot of infleunce from [Systematic Trading](https://www.amazon.com/Systematic-Trading-designing-trading-investing/dp/0857194453) by Rob Carver
 - Portfolio Analysis
