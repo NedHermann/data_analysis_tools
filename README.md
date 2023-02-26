@@ -7,6 +7,7 @@ This repository will cover all data analysis skills I found useful and implement
 - Linear Regression
 - Logistic Regression
 - Random Forest
+- Correlation Analysis
 - Text Mining
 - Exporatory Data Analysis
 - Back Testing
