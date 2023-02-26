@@ -109,7 +109,7 @@ holiday_tbl <- raw_tbl %>%
   arrange(date)
 ```
 
-### Sample of the holiday_tabl's output
+### Sample of the holiday_tbl's output
 - holiday: holiday's name
 - date: holiday's date
 
