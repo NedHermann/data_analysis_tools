@@ -40,7 +40,7 @@ rs_client$navigate("https://www.quora.com/profile/Aaron-Brown-165/answers")
 
 ### Website cont.
 Below is how the website looks. We want the title, sub-heading, question, answer, and url to each individual article.  
-As we can see, if the answers are long enough, the rest of it's contents will not be loaded behind the `more` button at the end of each answer. We are going to need to build a robust solution where, if the `more` element exists, to click it, and then scrape the full answer.
+As we can see, if the answers are long enough, the rest of it's contents will not be loaded until the `more` element at the end of each answer is clicked. We are going to need to build a robust solution where, if the `more` element exists, to click it, and then scrape the full answer.
 
 ![page](images/page.png)
 
