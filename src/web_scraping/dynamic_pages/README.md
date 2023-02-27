@@ -141,8 +141,8 @@ posts <- rs_client$findElements("css selector", "div.q-box.qu-pt--medium.qu-bord
 - We use the `lapply()` function to apply a function to each new post that we have pulled and saved them to a list called `scraped_posts`.
 - Within the lapply, first we specify the exact post we want to scrape by indexing by the current iteration and saving that post as `num`.
 - Then, we use the `$findChildElement()` and `$clickElement()` functions to find and click the `more` div that is suppressing the full content.
-  - We need to wrap this part with a `tryCatch` because if the element doesn't exist, it'll throw us an error. Whenever this occurs, I send a message to the console that specifies that this had occured and at what post number (we index posts later) did it occur in.
-- After attempting the click the `more` element, I then sleep our session by 1.5 seconds so the page can update.
+  - We need to wrap this part with a `tryCatch` because if the element doesn't exist, it'll throw us an error. Whenever this occurs, I send a message to the console that specifies that this had occured and at what post number (we index posts later).
+- After attempting to click the `more` element, I then sleep our session by 1.5 seconds so the page can update.
 - To collect the answer's url, I use the `$findChildElements()` function again to save all anchor tags in the list called `link_urls`.
 - Finally, I use the `$getElementText()` function to pull all the text of the post, used the `str_split_fixed()` function to split the text by element, convert the vector of text into a dataframe, and then add the `url` and `timestamp` columns.
   - The last url of the link_urls list contains the article's url. So, we'll grab that with the `last()` function and use the `$getElementAttribute()` function to pull it's href.
