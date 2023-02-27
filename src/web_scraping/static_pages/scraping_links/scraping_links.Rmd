@@ -23,44 +23,66 @@ head(div_tags, 5)
 msft_tbl <- lapply(1:length(div_tags), function(x){
   el <- div_tags[[x]] 
   
-  title <- el %>%
-    html_nodes("ul li:nth-child(3) h3") %>%
-    html_text()
-  
   date <- el %>%
     html_nodes("ul li:nth-child(2)") %>%
     html_text() %>%
     as.Date(., format = "%B %d, %Y")
   
+  title <- el %>%
+    html_nodes("ul li:nth-child(3) h3") %>%
+    html_text()
+  
+  subtitle <- el %>%
+    html_nodes("ul li:nth-child(4)") %>%
+    html_text()
+  
   if(length(html_nodes(el, "ul li:nth-child(1) a")) > 0){
-    link <- html_nodes(el, "ul li:nth-child(1) a") %>%
-      html_attr("href") 
+    article <- html_nodes(el, "ul li:nth-child(1) a") %>%
+      html_attr("href")
     
   } else {
-    link <- NA
+    article <- NA
   }
+  
+  supl_links <- el %>%
+    html_nodes("ul li:nth-child(5) a") %>%
+    html_attr("href")
+  
+  supl_link_names <- el %>%
+    html_nodes("ul li:nth-child(5) a") %>%
+    html_text()
   
   tbl <- data.frame(
     date = date,
     title = title,
-    link = link)
+    subtitle = subtitle,
+    link_name = janitor::make_clean_names(c("article", supl_link_names)),
+    link = c(article, supl_links))
   
   return(tbl)
 })
 
 head(msft_tbl, 5)
-# write_csv(msft_tbl[[1]], "data/scrape_tbl_sample.csv")
+# write_csv(msft_tbl[[1]], "data/msft_tbl_sample.csv")
 ```
 
 ```{r}
-msft_tbl <- bind_rows(msft_tbl) %>%
+msft_tbl_long <- bind_rows(msft_tbl) %>%
   mutate(link = ifelse(str_starts(link, "/"), paste("https://microsoft.com", link, sep = ""), link)) %>%
   arrange(desc(date))
 
-head(msft_tbl, 5)
-# write_csv(head(msft_tbl, 5), "data/msft_tbl_sample.csv")
+head(msft_tbl_long, 5)
+# write_csv(head(msft_tbl_long, 5), "data/msft_tbl_long_sample.csv")
 ```
 
+```{r}
+msft_tbl_wide <- msft_tbl_long %>%
+  pivot_wider(names_from = "link_name", values_from = "link") %>%
+  arrange(desc(date))
+
+head(msft_tbl_wide, 5)
+# write_csv(head(msft_tbl_wide, 5), "data/msft_tbl_wide_sample.csv")
+```
 
 
 
