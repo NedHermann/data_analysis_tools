@@ -26,7 +26,7 @@ rs_client$navigate("https://www.quora.com/profile/Aaron-Brown-165/answers")
 ```{r}
 tbl <- list()
 ref_height <- rs_client$executeScript("return document.body.scrollHeight")[[1]]
-new_height <- ref_height + 0.123
+new_height <- ref_height + 1
 collected_posts <- 0
 ```
 
@@ -35,8 +35,8 @@ while(new_height > ref_height){
   
   timestamp <- Sys.time()
   
-  if(new_height - ref_height != 0.123){
-    last_height <- new_height
+  if(length(tbl) > 0){
+    ref_height <- new_height
   } 
   
   posts <- rs_client$findElements("css selector", "div.q-box.qu-pt--medium.qu-borderBottom") %>%
@@ -91,7 +91,7 @@ quora_tbl <- bind_rows(tbl) %>%
          time_ago = gsub("^(.*\\))", "", sub_heading),
          sub_heading = str_remove_all(sub_heading, time_ago),
          index = 1:n()) %>%
-  select(index, author, sub_heading, question, answer, timestamp, time_ago)
+  select(index, author, sub_heading, question, answer, url, timestamp, time_ago)
 
 head(quora_tbl, 5)
 # write_csv(head(quora_tbl, 5), "data/quora_tbl_sample.csv")
