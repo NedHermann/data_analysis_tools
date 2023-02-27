@@ -6,10 +6,10 @@ Each website you want to scrape will be different. Some of the data you want are
 
 ### DIRECTORY:
 - Scraping HTML Tables
-  - Code: [static_pages/scraping_tables](static_pages/scraping_tables)
+  - Code: [static_pages/scraping_tables](scraping_tables)
   - Description: Scrapes html tables with the `rvest` library. The table we scraped in this example wasn't paginated, but if it was, you would scrape the anchor tag that it would redirect you to (ie. `domain.com/table?pg=2`), read it's html, and then just scrape it's contents. You would create a loop to go through all the available pages. Sometimes, the pagination doesn't redirect you to another page, the data is already there but hidden. In this case, you can just scrape the single page.
 
 - Scraping Links
-  - Code: [static_pages/scraping_links](static_pages/scraping_links)
+  - Code: [static_pages/scraping_links](scraping_links)
   - Description: Scrapes links with the `rvest` library. The function we used to scrape html tables is straight-forward but it only works for `table` elements. Sometimes the stuff you want to scrape from static websites are a bit more involved. In this case, I went to msft's investors releation website to scrape it's news releases. Again, didn't need to deal with pagination and we could've pulled more information on the articles than we did - but the techniques used can be leveraged to achieve both feats if needed.
  
