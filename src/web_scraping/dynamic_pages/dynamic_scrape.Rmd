@@ -1,0 +1,100 @@
+---
+title: "Web Scraping - Dynamic Websites"
+author: Ned Hermann
+---
+
+```{r}
+library(tidyverse)
+library(RSelenium)
+library(netstat)
+```
+
+```{r}
+rs_driver_obj <- rsDriver(
+  browser = "firefox",
+  chromever = NULL,
+  verbose = FALSE,
+  port = netstat::free_port())
+
+rs_client <- rs_driver_obj$client
+```
+
+```{r}
+rs_client$navigate("https://www.quora.com/profile/Aaron-Brown-165/answers")
+```
+
+```{r}
+tbl <- list()
+ref_height <- rs_client$executeScript("return document.body.scrollHeight")[[1]]
+new_height <- ref_height + 0.123
+collected_posts <- 0
+```
+
+```{r}
+while(new_height > ref_height){
+  
+  if(new_height - ref_height != 0.123){
+    last_height <- new_height
+  } 
+  
+  posts <- rs_client$findElements("css selector", "div.q-box.qu-pt--medium.qu-borderBottom") %>%
+    tail(., length(.)-collected_posts)
+  
+  scraped_posts <- lapply(1:length(posts), function(x){
+    num <- posts[[x]]
+    
+    tryCatch({
+      num$findChildElement("css selector", "div.qt_read_more")$clickElement() %>%
+        suppressMessages()
+      
+      Sys.sleep(time = 1.5)
+      
+    }, error = function(e){
+      message(sprintf("No read more for post: %s", collected_posts + x))
+    })
+    
+    tbl <- num$getElementText() %>%
+      str_split_fixed(., "\n", 4) %>%
+      data.frame() %>%
+      select("author" = 1, "sub_heading" = 2, "question" = 3, "answer" = 4) %>%
+      mutate(timestamp = Sys.time())
+    
+    return(tbl)
+  })
+  
+  tbl[[length(tbl)+1]] <- bind_rows(scraped_posts)
+  
+  rs_client$executeScript("window.scrollTo(0, document.body.scrollHeight);")
+  
+  Sys.sleep(time = 1.5)
+  
+  new_height <- rs_client$executeScript("return document.body.scrollHeight")[[1]]
+  collected_posts <- collected_posts + length(posts)
+  
+  if(collected_posts > 20){
+    break
+  }
+}
+
+head(tbl, 5)
+# write_csv(tbl[[1]], "data/tbl_sample.csv")
+```
+
+```{r}
+quora_tbl <- bind_rows(tbl) %>%
+  mutate(answer = str_replace_all(answer, "\n", " "),
+         time_ago = gsub("^(.*\\))", "", sub_heading),
+         sub_heading = str_remove_all(sub_heading, time_ago),
+         index = 1:n()) %>%
+  select(index, time_ago, author, sub_heading, question, answer)
+
+head(quora_tbl, 5)
+# write_csv(head(quora_tbl, 5), "data/quora_tbl_sample.csv")
+```
+
+```{r}
+rs_client$quit()
+# rm(list = ls())
+```
+
+
