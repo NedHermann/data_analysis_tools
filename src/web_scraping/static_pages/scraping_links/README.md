@@ -20,6 +20,7 @@ url <- "https://www.microsoft.com/en-us/investor/events/events-recent.aspx"
 ```
 
 The articles we will be scraping looks like this:  
+
 ![msft_tbl](images/msft.png)
 
 ### Reading HTML
