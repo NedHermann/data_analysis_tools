@@ -1,6 +1,6 @@
 ## WEB SCRAPING - STATIC LINKS
 
-We will be going over how to use [rvest](https://github.com/tidyverse/rvest) to scrape links from [static websites](https://en.wikipedia.org/wiki/Static_web_page). Refer to the [static_pages/scraping_tables](./scraping_tables) readme for details of each functions.
+We will be going over how to use [rvest](https://github.com/tidyverse/rvest) to scrape links from [static websites](https://en.wikipedia.org/wiki/Static_web_page). Refer to the [static_pages/scraping_tables/README.md](./scraping_tables/README.md) for details of each functions.
 
 ### Loading Libraries
 - tidyverse: data science
