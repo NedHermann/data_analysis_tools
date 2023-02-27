@@ -130,7 +130,7 @@ if(length(tbl) > 0){
 
 ### While loop cont.
 - We use the `$findElements()` function to find all posts loaded on the page.
-- We then create a new variable called `posts` that'll save all of the posts we *didn't* collected yet by subtracting our collected_posts number with our total posts.
+- We then create a new variable called `posts` that'll save all of the posts we *didn't* collect yet by subtracting our collected_posts number from our total posts.
 
 ```
 posts <- rs_client$findElements("css selector", "div.q-box.qu-pt--medium.qu-borderBottom") %>%
