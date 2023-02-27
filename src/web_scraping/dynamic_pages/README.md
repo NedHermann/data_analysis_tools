@@ -45,7 +45,7 @@ As we can see, if the answers are long enough, the rest of it's contents will no
 ![page](images/page.png)
 
 ### Defining variables for our while loop
-We are going to use a `while loop` to scrape Aaron's answers. There isn't really any defined way to pull the 13k answer, we'll just need to constantly get the driver to scroll down, load the new posts, open the full answers, and then scrape it's contents.  
+We are going to use a `while loop` to scrape Aaron's answers. There isn't really any defined way to pull the 13,000th answer, we'll just need to constantly get the driver to scroll down, load the new posts, open the full answers, and then scrape it's contents.  
 For this while loop, we'll need to define a few variables:
 - tbl: an empty list object that'll contain our scraped posts
 - ref_height: our reference (or last) height of the loop
