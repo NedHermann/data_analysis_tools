@@ -62,7 +62,7 @@ collected_posts <- 0
 ```
 
 ### The while loop
-A lot to unpack here, we'll take it step-by-step. The way the while loop is structured is that while the statement `new_height > ref_height` is `true`, then it'll run the function and it'll repeat. This is why we need the new_height variable to start out greater than ref_height.
+A lot to unpack here, we'll take it step-by-step. The way the while loop is structured is that while the statement `new_height > ref_height` is *true*, then it'll run the function, then repeat. This is why we need the new_height variable to start out greater than ref_height.
 
 ```
 while(new_height > ref_height){
