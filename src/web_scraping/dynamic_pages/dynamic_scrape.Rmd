@@ -33,6 +33,8 @@ collected_posts <- 0
 ```{r}
 while(new_height > ref_height){
   
+  timestamp <- Sys.time()
+  
   if(new_height - ref_height != 0.123){
     last_height <- new_height
   } 
@@ -53,11 +55,14 @@ while(new_height > ref_height){
       message(sprintf("No read more for post: %s", collected_posts + x))
     })
     
+    link_urls <- posts[[x]]$findChildElements("css selector", "a")
+    
     tbl <- num$getElementText() %>%
       str_split_fixed(., "\n", 4) %>%
       data.frame() %>%
       select("author" = 1, "sub_heading" = 2, "question" = 3, "answer" = 4) %>%
-      mutate(timestamp = Sys.time())
+      mutate(url = last(link_urls)$getElementAttribute("href")[[1]],
+             timestamp = timestamp)
     
     return(tbl)
   })
@@ -86,7 +91,7 @@ quora_tbl <- bind_rows(tbl) %>%
          time_ago = gsub("^(.*\\))", "", sub_heading),
          sub_heading = str_remove_all(sub_heading, time_ago),
          index = 1:n()) %>%
-  select(index, time_ago, author, sub_heading, question, answer)
+  select(index, author, sub_heading, question, answer, timestamp, time_ago)
 
 head(quora_tbl, 5)
 # write_csv(head(quora_tbl, 5), "data/quora_tbl_sample.csv")
