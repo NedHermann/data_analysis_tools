@@ -196,6 +196,14 @@ msft_tbl_long <- bind_rows(msft_tbl) %>%
 ### Transforming msft_tbl_long to a wide format
 You can also transform this long table to a wider one by the link_name column. This avoids repeating data from columns like date, title, subtitle and can be useful in some analysis.
 
+```
+msft_tbl_wide <- msft_tbl_long %>%
+  pivot_wider(names_from = "link_name", values_from = "link") %>%
+  arrange(desc(date))
+```
+
+### Sample of msft_tbl_wide output
+
 |date      |title                                       |subtitle                                                                  |article|webcast                                                      |blog                  |microsite                               |power_point                                                                                                                                                     |transcript                                                                                                                                                          |event_website                                                                 |
 |----------|--------------------------------------------|--------------------------------------------------------------------------|-------|-------------------------------------------------------------|----------------------|----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
 |2023-02-07|New AI-powered Bing and Edge Conference Call|Amy Hood, EVP & CFO and Phil Ockenden, CVP & CFO Windows, Devices & Search|https://microsoft.com/en-us/Investor/events/FY-2023/AI-Powered-Bing-Edge-Conf.aspx|https://microsoft.com/en-us/Investor/events/FY-2023/AI-Powered-Bing-Edge-Conf.aspx|https://aka.ms/AAjd7x2|https://news.microsoft.com/feb-2023-news|http://view.officeapps.live.com/op/view.aspx?src=https://c.s-microsoft.com/en-us/CMSFiles/InvestorPresentation.pptx?version=6ff579c4-103e-76c0-8a18-05085e0632c7|http://view.officeapps.live.com/op/view.aspx?src=https://c.s-microsoft.com/en-us/CMSFiles/Transcript223.docx?version=e69dc7f8-a0b8-7d09-ff82-f821891ad767           |NA                                                                            |
