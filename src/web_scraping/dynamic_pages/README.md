@@ -1,6 +1,6 @@
 ## WEB SCRAPING - DYNAMIC PAGES
 
-Using the RSelenium wrapper to scrape pages that loads elements dynamically. I chose a case where we'll have to execute some js scripts to scroll down to load more elements. I have another practical example of scraping a dynamic website for a trading project [here](https://github.com/NedHermann/trading_projects/tree/master/src/earnings_announcement_forecast). 
+Using the RSelenium wrapper to scrape pages that loads elements dynamically. I picked a case where we'll have to execute some js scripts to scroll down to load more elements. I have another practical example of scraping a dynamic website for a trading project [here](https://github.com/NedHermann/trading_projects/tree/master/src/earnings_announcement_forecast). 
 
 Most times, for dynamic websites I can just find the url request in the network tab & make my own requests to it - would bypass the need of any scrapers. 
 
