@@ -1,0 +1,187 @@
+---
+title: "R Notebook"
+---
+
+```{r}
+library(tidyverse)
+library(RSelenium)
+library(netstat)
+```
+
+```{r}
+rs_driver_obj <- rsDriver(
+  browser = "firefox",
+  chromever = NULL,
+  verbose = FALSE,
+  port = netstat::free_port())
+
+rs_client <- rs_driver_obj$client
+```
+
+# prep
+
+```{r}
+scrapeYears <- "
+  const obj = [];
+  const years = document.querySelectorAll('div.flex.flex-wrap.gap-2.py-3 a');
+  
+  for(const x of years) {
+    obj.push(x.getAttribute('href'));
+  }
+  return obj;"
+
+scrapeGames <- "
+  const obj = [];
+  const games = document.querySelectorAll('div.flex.flex-col.px-3.text-sm div.border-black-borders a[href^=\"/\"]');
+  
+  for(const x of games) {
+    const link = x.getAttribute('href');
+    if(!obj.includes(link)) {
+        obj.push(link);
+    }
+  }
+  return obj;"
+```
+
+# navigate to oddsportal
+
+```{r}
+rs_client$navigate("https://www.oddsportal.com/football/north-central-america/gold-cup/results/")
+```
+
+# scrape all years url
+
+```{r}
+years <- unlist(rs_client$executeScript(scrapeYears))
+years[1:3]
+```
+
+# scrape all games url
+
+```{r}
+games <- NULL
+
+for(x in 1:length(years)) {
+  year_url <- years[x]
+  rs_client$navigate(year_url)
+  Sys.sleep(time = 1)
+  
+  rs_client$executeScript("window.scrollTo(0, document.body.scrollHeight);")
+  games <- c(games, unlist(rs_client$executeScript(scrapeGames)))
+}
+
+games <- sprintf("https://www.oddsportal.com%s", games)
+games[1:3]
+```
+
+```{r}
+game_data <- list()
+
+for(x in 1:length(games)) {
+  game <- games[x]
+  
+  for(type in c("full_time", "first_half")) {
+    url <- ifelse(type == "full_time", sprintf("%s#1X2;2", game), sprintf("%s#1X2;3", game))
+    rs_client$navigate(url)
+    Sys.sleep(time = 1)
+    
+    if(type == "full_time") {
+      title <- rs_client$findElement('css selector', 'div.flex.flex-col div.w-auto')
+      teams <- title$findChildElements('css selector', 'p')
+      home_team <- teams[[1]]$getElementText()[[1]]
+      away_team <- teams[[2]]$getElementText()[[1]]
+      
+      subtitle <- rs_client$findElement('css selector', 'div.flex.flex-col div.w-auto + div')
+      date <- subtitle$findChildElement('css selector', 'div:nth-child(1)')$getElementText()[[1]]
+      result <- subtitle$findChildElement('css selector', 'div strong')$getElementText()[[1]]
+      
+      game_data[[x]] <- list(
+        `home` = home_team,
+        `away` = away_team,
+        `date` = date,
+        `result` = result)
+    }
+    
+    bookmakers <- rs_client$findElements('css selector', 'div.flex.text-xs.border-b.h-9.border-l.border-r')
+    odds_data <- list()
+    
+    if(length(bookmakers) > 0){
+      for(i in 1:length(bookmakers)) {
+        odds <- bookmakers[[i]]$findChildElements('css selector', 'p')
+        
+        if(length(odds) == 4) {
+          moneylines <- lapply(2:4, function(odd) {
+            rs_client$mouseMoveToLocation(webElement = odds[[odd]])
+            Sys.sleep(time = 1)
+            
+            close_ml <- odds[[odd]]$getElementText()[[1]]
+            tryCatch({
+              tooltip <- rs_client$findElement('css selector', 'div.tooltip')
+              open_odds <- tooltip$findChildElement('css selector', 'div.gap-1.mt-2 div.flex.gap-1')
+              open_ml <- open_odds$findChildElement('css selector', 'div.font-bold')$getElementText()[[1]]
+              return(list(`open` = open_ml, `close` = close_ml))
+              
+            }, error = function(e) {
+              return(list(`open` = close_ml, `close` = close_ml))
+            })
+          })
+          
+          names(moneylines) <- c("1", "X", "2")
+          bookmaker <- odds[[1]]$getElementText()[[1]]
+          odds_data[[bookmaker]] <- moneylines
+        }
+      }
+    }
+    game_data[[x]][[type]] <- odds_data
+  }
+  saveRDS(game_data[[x]], sprintf("data/game_data_%s.rds", x))
+}
+```
+
+```{r}
+# saveRDS(game_data, "data/game_data.rds")
+```
+
+```{r}
+# library(doParallel)
+# registerDoParallel(cores = 10)
+
+gold_cup <- foreach(x = 1:length(game_data), .combine = "bind_rows", .packages = "dplyr") %dopar% {
+  game <- game_data[[x]]
+  full_time <- game$full_time
+  first_half <- game$first_half
+  return(data.frame(
+    `id` = x,
+    `date` = game$date,
+    `home` = game$home,
+    `away` = game$away,
+    `result` = game$result,
+    `period` = c(rep("full_time", length(full_time)*3), rep("first_half", length(first_half)*3)),
+    `bookmaker` = c(rep(names(full_time), 3), rep(names(first_half), 3))) %>%
+      arrange(period, bookmaker) %>%
+      mutate(`bet` = rep(c('1', 'X', '2'), length(full_time)+length(first_half)),
+             `open_ml` = NA,
+             `close_ml` = NA))
+}
+
+for(x in 1:nrow(gold_cup)) {
+  event <- gold_cup[x,]
+  odds <- game_data[[event$id]][[event$period]][[event$bookmaker]][[event$bet_type]]
+  gold_cup[x,c("open_ml", "close_ml")] <- c(odds$open, odds$close)
+}
+
+gold_cup <- gold_cup %>%
+  mutate(id = abs(id-max(id))+1,
+         date = as.POSIXct(date, format = "%A,\n%d %b %Y,\n%H:%M"),
+         event = "Gold Cup",
+         across(c("open_ml", "close_ml"), function(x) parse_number(x, na = "-"))) %>%
+  select(id, date, event, home:close_ml) %>%
+  arrange(date, period, bookmaker, bet)
+
+# saveRDS(gold_cup, "data/gold_cup.rds")
+```
+
+```{r}
+# write_csv(gold_cup, "data/gold_cup.csv")
+# rs_client$close()
+```
